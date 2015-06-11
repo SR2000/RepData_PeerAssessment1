@@ -1,16 +1,12 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
 
 The file was unzipped and read as a .csv file
 
-```{r Q1-0}
+
+```r
 if (!file.exists("activity")) {unzip("activity.zip")
                                activity<-read.csv("activity.csv",stringsAsFactors=FALSE)}
 ```
@@ -18,74 +14,95 @@ if (!file.exists("activity")) {unzip("activity.zip")
 ## What is mean total number of steps taken per day?
 
 The date column values were converted from character type to date type, and all the missing values were removed from the data set
-```{r Q2-0}
+
+```r
 activity_without_rep<-activity
 activity_without_rep$date<-as.Date(activity_without_rep$date)
 activity_without_rep<-na.omit(activity_without_rep)
-
 ```
 
 The steps were grouped by date and totalled for every day, and the columns in the resultant grouped data set were renamed to their original names
-```{r Q2-1}
+
+```r
 activity_without_rep_grp<-aggregate(activity_without_rep$steps, by=list(activity_without_rep$date),sum)
 names(activity_without_rep_grp)[1]<-paste("date")
 names(activity_without_rep_grp)[2]<-paste("steps")
 ```
 
 A histogram was plotted for total number of steps in a day without replacement
-```{r Q2-2}
-hist(activity_without_rep_grp$steps,freq=TRUE, xlab="Total Number of Steps in a Day", main="Total Number of Steps in a Day without Replacement", col="red")
 
+```r
+hist(activity_without_rep_grp$steps,freq=TRUE, xlab="Total Number of Steps in a Day", main="Total Number of Steps in a Day without Replacement", col="red")
 ```
 
-Mean of the total number of steps in a day was calculated
-```{r Q2-3}
-mean(activity_without_rep_grp$steps)
+![](PA1_template_files/figure-html/Q2-2-1.png) 
 
+Mean of the total number of steps in a day was calculated
+
+```r
+mean(activity_without_rep_grp$steps)
+```
+
+```
+## [1] 10766.19
 ```
 
 Median of the total number of steps in a day was calculated
-```{r Q2-4}
-median(activity_without_rep_grp$steps)
 
+```r
+median(activity_without_rep_grp$steps)
+```
+
+```
+## [1] 10765
 ```
 
 
 ## What is the average daily activity pattern?
 
 A new data set was created from the original data set with only the required columns (interval and steps)
-```{r Q3-0}
-activity_in_five_min_interval<-activity[,c(3,1)]
 
+```r
+activity_in_five_min_interval<-activity[,c(3,1)]
 ```
 
 All steps were grouped by interval and the mean number of steps for every interval was calculated, and the columns in the resultant grouped data set were renamed to their original names
-```{r Q3-1}
+
+```r
 activity_in_five_min_interval_grp<-aggregate(activity_in_five_min_interval$steps, by=list(activity_in_five_min_interval$interval),mean,na.rm=TRUE)
 names(activity_in_five_min_interval_grp)[1]<-paste("interval")
 names(activity_in_five_min_interval_grp)[2]<-paste("steps")
-
 ```
 
 A time series plot was created for the mean number of steps in a 5 minute interval averaged across all days
-```{r Q3-2}
-plot(activity_in_five_min_interval_grp$steps ~ activity_in_five_min_interval_grp$interval, type = "l", xlab="Interval", ylab="Average Number of Steps across all days", main="Average Number of Steps across all days in a 5 minute Interval", col="red" )
 
+```r
+plot(activity_in_five_min_interval_grp$steps ~ activity_in_five_min_interval_grp$interval, type = "l", xlab="Interval", ylab="Average Number of Steps across all days", main="Average Number of Steps across all days in a 5 minute Interval", col="red" )
 ```
 
-The interval with the maximum number of steps was calculated
-```{r Q3-3}
-activity_in_five_min_interval_grp[which(activity_in_five_min_interval_grp$steps==max(activity_in_five_min_interval_grp$steps)),1]
+![](PA1_template_files/figure-html/Q3-2-1.png) 
 
+The interval with the maximum number of steps was calculated
+
+```r
+activity_in_five_min_interval_grp[which(activity_in_five_min_interval_grp$steps==max(activity_in_five_min_interval_grp$steps)),1]
+```
+
+```
+## [1] 835
 ```
 
 
 ## Imputing missing values
 
 The number of missing values was calculated
-```{r Q4-0}
-sum(is.na(activity))
 
+```r
+sum(is.na(activity))
+```
+
+```
+## [1] 2304
 ```
 
 
@@ -100,7 +117,8 @@ The daily mean was used to replace any missing value for that date and in certai
 
 This strategy was sufficient to replace all the missing values in the given data set.
 
-```{r 4-1}
+
+```r
 #Creating a lookup table with average number of steps in a day without replacing the missing values
 #Looping through all rows of the original data frame and on encountering a missing value,
 #the date on the row is matched with a date in the lookup table
@@ -127,33 +145,42 @@ for (i in 1:nrow(activity_with_rep)){
             activity_with_rep[i,1]<-subset(activity_with_rep_grp, activity_with_rep_grp$date==activity_with_rep[i,2])$steps}
     }
 }
-
 ```
 
 All steps were grouped by date and then totalled for every day
-```{r Q4-2}
+
+```r
 activity_with_rep_grp_sum<-aggregate(activity_with_rep$steps, by=list(activity_with_rep$date),sum)
 names(activity_with_rep_grp_sum)[1]<-paste("date")
 names(activity_with_rep_grp_sum)[2]<-paste("steps")
-
 ```
 
 A histogram was created for total number of steps in a day, after the missing values have been replaced
-```{r Q4-3}
-hist(activity_with_rep_grp_sum$steps,freq=TRUE, xlab="Total Number of Steps in a Day", main="Total Number of Steps in a Day after Replacement", col="blue")
 
+```r
+hist(activity_with_rep_grp_sum$steps,freq=TRUE, xlab="Total Number of Steps in a Day", main="Total Number of Steps in a Day after Replacement", col="blue")
 ```
 
-The mean of the total number of steps in a day after replacement, was calculated
-```{r Q4-4}
-mean(activity_with_rep_grp_sum$steps)
+![](PA1_template_files/figure-html/Q4-3-1.png) 
 
+The mean of the total number of steps in a day after replacement, was calculated
+
+```r
+mean(activity_with_rep_grp_sum$steps)
+```
+
+```
+## [1] 10286.87
 ```
 
 The median of the total number of steps in a day after replacement, was calculated
-```{r Q4-5}
-median(activity_with_rep_grp_sum$steps)
 
+```r
+median(activity_with_rep_grp_sum$steps)
+```
+
+```
+## [1] 10600
 ```
 
 ### Impact on mean and median after replacing the missing values
@@ -164,7 +191,8 @@ Replacing the missing values with their respective daily means or if the daily m
 ## Are there differences in activity patterns between weekdays and weekends?
 
 The required packages, plyr and lattice were installed and loaded if absent in the workspace
-```{r Q5-0}
+
+```r
 #Installing the required packages if absent
 is_installed <- function(pkg) is.element(pkg, installed.packages()[,1])
 if(!is_installed("plyr"))  
@@ -178,19 +206,19 @@ if(!is_installed("lattice"))
         install.packages("lattice",repos="http://lib.stat.cmu.edu/R/CRAN", dependencies=TRUE)  
 }  
 suppressWarnings(library("lattice",character.only=TRUE,quietly=TRUE,verbose=FALSE))
-
 ```
 
 All the dates in the missing- value- replaced table were converted to day-of-the-week
-```{r Q5-1}
+
+```r
 activity_with_rep_panel<-activity_with_rep
 activity_with_rep_panel$date<-as.Date(activity_with_rep_panel$date)
 activity_with_rep_panel$date<-weekdays(activity_with_rep_panel$date)
-
 ```
 
 All the values in the date column in the missing- value- replaced table were converted to weekday or weekend
-```{r Q5-2}
+
+```r
 for (i in 1:nrow(activity_with_rep_panel)){
     if(activity_with_rep_panel$date[i] %in% c("Saturday", "Sunday")){
         activity_with_rep_panel[i,2]<-"Weekend"
@@ -199,27 +227,28 @@ for (i in 1:nrow(activity_with_rep_panel)){
         activity_with_rep_panel[i,2]<-"Weekday"
     }
 }
-
 ```
 
 The date column was converted to a factor
-```{r Q5-3} 
-activity_with_rep_panel$date<-factor(activity_with_rep_panel$date)
 
+```r
+activity_with_rep_panel$date<-factor(activity_with_rep_panel$date)
 ```
 
 The steps were grouped by by day of the week, followed by interval and then the mean number of steps were calculated
 The columns in the resultant grouped data set were renamed to day, interval and steps respectively
-```{r Q5-4}
+
+```r
 activity_with_rep_panel_grp<-ddply(activity_with_rep_panel,.(date,interval),function(x) mean(x[,1]))
 colnames(activity_with_rep_panel_grp)<-c("day","interval","steps")
-
 ```
 
 A time series panel plot was created using the lattice package
-```{r Q5-5}
-xyplot(activity_with_rep_panel_grp$steps ~ activity_with_rep_panel_grp$interval|activity_with_rep_panel_grp$day, type="l",xlab="Interval", ylab="Average Number of Steps across all Days", main="Average Number of Steps across all Weekend/ Weekday \n Days in a 5 Minute Interval",layout=c(1,2))
 
+```r
+xyplot(activity_with_rep_panel_grp$steps ~ activity_with_rep_panel_grp$interval|activity_with_rep_panel_grp$day, type="l",xlab="Interval", ylab="Average Number of Steps across all Days", main="Average Number of Steps across all Weekend/ Weekday \n Days in a 5 Minute Interval",layout=c(1,2))
 ```
+
+![](PA1_template_files/figure-html/Q5-5-1.png) 
 
 The peak number of steps traversed was reached about the same time on the weekday as on the weekend but as time went by, during mid-day, the activity was lower during a weekday than on the weekend. Towards the end of the day, the activity during the weekday was not very different from the weekend. The plot seemed typical of a person's standard work day with an active weekend.
